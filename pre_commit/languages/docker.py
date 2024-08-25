@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
@@ -59,6 +60,16 @@ def _get_docker_path(path: str) -> str:
     # we're in Docker, but the path is not mounted, cannot really do anything,
     # so fall back to original path
     return path
+
+
+def get_env_patch() -> PatchesT:
+    return (("PODMAN_USERNS", "keep-id"),)
+
+
+@contextlib.contextmanager
+def in_env(prefix: Prefix, version: str) -> Generator[None, None, None]:
+    with envcontext(get_env_patch()):
+        yield
 
 
 def md5(s: str) -> str:  # pragma: win32 no cover
